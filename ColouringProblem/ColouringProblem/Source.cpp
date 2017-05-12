@@ -4,12 +4,12 @@
 #include<list>
 #include<vector>
 #include <string>
+std::vector< std::vector<int> > graph;
 
-int main() {
+std::vector< std::vector<int> > touchingBlocks() {
 	std::string line, number = "";
 	int i;
 	std::ifstream colouredBlocks("blocks.txt");
-	std::vector< std::vector<int> > graph;
 	//open file of coloured blocks
 	if (colouredBlocks.is_open()) {
 		// delimit per new line
@@ -19,7 +19,7 @@ int main() {
 			std::stringstream ss(line);
 			while (ss >> i) {
 				//add each number to the variable number
-				number+=std::to_string(i);
+				number += std::to_string(i);
 				//when meeting a comma, ignore it, parse the string to int and add it to the back of the subgraph
 				//we don't insert the number directly because it might contain more than one digits
 				if (ss.peek() == ',') {
@@ -28,36 +28,37 @@ int main() {
 				subgraph.push_back(stoi(number));
 				number = "";
 				//push the vector in the main vector and switch to the next line
-				graph.push_back(subgraph);
-				subgraph.erase(subgraph.begin(), subgraph.end());
 			}
+			graph.push_back(subgraph);
+			subgraph.erase(subgraph.begin(), subgraph.end());
 		}
 		colouredBlocks.close();
 	}
-	else std::cout << "Unable to open file"	;
+	else std::cout << "Unable to open file";
 
-	
+	return graph;
+}
+
+void printGraph() {
+
 	//printing the vector
 	for (int i = 0; i < graph.size(); i++) {
 		for (int j = 0; j < graph[i].size(); j++) {
-			std::cout << graph[i][j];
+			std::cout << graph[i][j] << " ";
 		}
+		std::cout << "\n";
 	}
+}
+
+void initialisePopulation() {
+
+}
+
+int main() {
+	graph = touchingBlocks();
+	int population[100][16];
+
 
 	std::cin >> i;
-	
-	/*int numberOfBlocks;
-	std::cout << "Enter total number of blocks to be coloured: \n";
-	std::cin >> numberOfBlocks;
-	
-	for (int i = 0; i < numberOfBlocks; i++) {
-		while (true) {
-			int number;
-			std::cin >> number;
-			subgraph.push_back(number);
-		}
-		graph.push_back(subgraph);
-		}*/
-	
 	return 0;
 }
