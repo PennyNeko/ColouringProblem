@@ -30,6 +30,7 @@ std::vector< std::vector<int> > touchingBlocks() {
 				//push the vector in the main vector and switch to the next line
 			}
 			graph.push_back(subgraph);
+			// TODO: remove; is unnecessary
 			subgraph.erase(subgraph.begin(), subgraph.end());
 		}
 		colouredBlocks.close();
