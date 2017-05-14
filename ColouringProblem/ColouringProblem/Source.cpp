@@ -10,8 +10,9 @@
 std::vector< std::vector<int> > graph;
 int const GRAPH_BLOCKS = 16;
 int const POPULATION_SIZE = 100;
-int population[POPULATION_SIZE][GRAPH_BLOCKS];
-std::vector<int>fitness;
+int const PARENT_POPULATION_SIZE = 50;
+std::vector< std::vector<int> > population(POPULATION_SIZE);
+std::vector<int>fitness(POPULATION_SIZE);
 
 std::vector< std::vector<int> > touchingBlocks() {
 	std::string line, number = "";
@@ -63,7 +64,7 @@ void const printGraph() {
 	std::uniform_int_distribution<> dis(0, 3);
 	for (int i = 0; i < POPULATION_SIZE; ++i) {
 		for (int j = 0; j < GRAPH_BLOCKS; ++j) {
-			population[i][j] = dis(gen);
+			population[i].push_back(dis(gen));
 		}
 	}
 }
@@ -77,26 +78,22 @@ void const printGraph() {
 	 }
  }
 
-std::vector<int> initializeFitness() {
-	 for (int i = 0; i < POPULATION_SIZE; ++i) {
-		 fitness.push_back(0);
-	 }
-	 return fitness;
- }
-
 std::vector<int> applyFitness() {
+	int totalFitness = 0;
 	 for (int i = 0; i < POPULATION_SIZE; ++i) {
 		 for (int j = 0; j < GRAPH_BLOCKS; ++j) {
 			 for (int k = 0; k < graph[j].size(); ++k) {
 				 if (population[i][j] == population[i][graph[j][k] - 1]) {
-					 fitness.at(i) += 0;
+					 fitness[i] += -1;
 				 }
 				 else {
-					 fitness.at(i) += 1;
+					 fitness[i] += 1;
 				 }
 			 }
 		 }
+		 totalFitness += fitness[i];
 	 }
+	 fitness.push_back(totalFitness);
 	 return fitness;
  }
 
@@ -106,13 +103,56 @@ std::vector<int> applyFitness() {
 	 }
  }
 
+ 
+
+  int rouletteWheelSelection(int totalFitness) {
+	 std::random_device rd;  //Will be used to obtain a seed for the random number engine
+	 std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+	 std::uniform_int_distribution<> dis(0, totalFitness);
+		 int randInt = dis(gen);
+		 for (int j = 0; j<POPULATION_SIZE; ++j) {
+			 if (randInt < fitness[j])
+				 return j;
+			 randInt -= fitness[j];
+		 }
+	 }
+
+
+ int uniformSelection() {
+	 std::vector< std::vector<int> >selectedParents;
+	 std::random_device rd;  //Will be used to obtain a seed for the random number engine
+	 std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+	 std::uniform_int_distribution<> dis(0, POPULATION_SIZE);
+	 return dis(gen);
+
+	 }
+
+ std::vector< std::vector<int> > parentSelection(int totalFitness) {
+	 std::vector< std::vector<int> >selectedParents;
+	 for (int i = 0; i < PARENT_POPULATION_SIZE; ++i) {
+		 selectedParents.push_back(population[rouletteWheelSelection(totalFitness)]);
+		 //uncomment for uniform selection algorithm
+		 //selectedParents[i] = population[uniformSelection()];
+	 }
+	 return selectedParents;
+ }
+
 int main() {
 	graph = touchingBlocks();
 	initialisePopulation();
 	printPopulation();
-	fitness = initializeFitness();
 	fitness = applyFitness();
+	int totalFitness = fitness.back();
+	fitness.pop_back();
 	printFitness(fitness);
+	std::vector< std::vector<int> > selectedParents = parentSelection(totalFitness);
+	for (std::vector<int> vec : selectedParents) {
+		for (int vecc : vec) {
+			std::cout << vecc << " ";
+		}
+		std::cout << "\n";
+	}
+	
 	int i;
 	std::cin >>  i;
 	return 0;
