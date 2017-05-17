@@ -5,14 +5,15 @@
 #include<vector>
 #include <string>
 #include <random>
-#include "Source.h"
 
 std::vector< std::vector<int> > graph;
 int const GRAPH_BLOCKS = 16;
 int const POPULATION_SIZE = 100;
-int const PARENT_POPULATION_SIZE = 50;
+int bestSolutionPosition;
+int const PARENT_RECOMBINATION_NUMBER = 50;
 std::vector< std::vector<int> > population(POPULATION_SIZE);
 std::vector<int>fitness(POPULATION_SIZE);
+int maxFitness = 0;
 
 std::vector< std::vector<int> > touchingBlocks() {
 	std::string line, number = "";
@@ -79,7 +80,6 @@ void const printGraph() {
  }
 
 std::vector<int> applyFitness() {
-	int totalFitness = 0;
 	 for (int i = 0; i < POPULATION_SIZE; ++i) {
 		 for (int j = 0; j < GRAPH_BLOCKS; ++j) {
 			 for (int k = 0; k < graph[j].size(); ++k) {
@@ -91,9 +91,7 @@ std::vector<int> applyFitness() {
 				 }
 			 }
 		 }
-		 totalFitness += fitness[i];
 	 }
-	 fitness.push_back(totalFitness);
 	 return fitness;
  }
 
@@ -127,9 +125,28 @@ std::vector<int> applyFitness() {
 
 	 }
 
- std::vector< std::vector<int> > parentSelection(int totalFitness) {
+ std::vector< std::vector<int> > newPopulationSelectionFromOld() {
+	 int totalFitness = 0;
+	 for (int vec : fitness) {
+		 totalFitness += vec;
+	 }
 	 std::vector< std::vector<int> >selectedParents;
-	 for (int i = 0; i < PARENT_POPULATION_SIZE; ++i) {
+	 for (int i = 0; i < POPULATION_SIZE-PARENT_RECOMBINATION_NUMBER; ++i) {
+		 int positionOfSelectedMember = rouletteWheelSelection(totalFitness);
+		 selectedParents.push_back(population[positionOfSelectedMember]);
+		 population[positionOfSelectedMember].erase(population[positionOfSelectedMember].begin(), population[positionOfSelectedMember].end());
+		 fitness.erase(fitness.begin()+positionOfSelectedMember - 1);
+		 //uncomment for uniform selection algorithm
+		 //selectedParents[i] = population[uniformSelection()];
+	 }
+	 return selectedParents;
+ }
+
+
+
+ std::vector< std::vector<int> > parentRecombinationSelection(int totalFitness) {
+	 std::vector< std::vector<int> >selectedParents;
+	 for (int i = 0; i < PARENT_RECOMBINATION_NUMBER; ++i) {
 		 selectedParents.push_back(population[rouletteWheelSelection(totalFitness)]);
 		 //uncomment for uniform selection algorithm
 		 //selectedParents[i] = population[uniformSelection()];
@@ -137,23 +154,135 @@ std::vector<int> applyFitness() {
 	 return selectedParents;
  }
 
-int main() {
-	graph = touchingBlocks();
-	initialisePopulation();
-	printPopulation();
-	fitness = applyFitness();
-	int totalFitness = fitness.back();
-	fitness.pop_back();
-	printFitness(fitness);
-	std::vector< std::vector<int> > selectedParents = parentSelection(totalFitness);
-	for (std::vector<int> vec : selectedParents) {
-		for (int vecc : vec) {
-			std::cout << vecc << " ";
-		}
-		std::cout << "\n";
-	}
-	
-	int i;
+ std::vector< std::vector<int> > parentMutationSelection(int totalFitness) {
+	 std::vector< std::vector<int> >selectedParents;
+	 for (int i = 0; i < PARENT_RECOMBINATION_NUMBER; ++i) {
+		 selectedParents.push_back(population[rouletteWheelSelection(totalFitness)]);
+		 //uncomment for uniform selection algorithm
+		 //selectedParents[i] = population[uniformSelection()];
+	 }
+	 return selectedParents;
+
+ }
+
+ std::vector< std::vector<int> > ParentRecombination(std::vector< std::vector<int> > selectedParents){
+	 std::vector< std::vector<int> > newPopulation;
+	 std::random_device rd;  //Will be used to obtain a seed for the random number engine
+	 std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+	 std::uniform_int_distribution<> dis(0, GRAPH_BLOCKS-1);
+	 int splitPoint = dis(gen);
+	 for (int i = 0; i < PARENT_RECOMBINATION_NUMBER; i+=2) {
+		 std::vector<int> childA, childB;
+		 for (int j = 0; j < splitPoint; ++j) {
+			 childA.push_back(selectedParents[i][j]);
+			 childB.push_back(selectedParents[i + 1][j]);
+		 }
+		 for (int j = splitPoint; j < GRAPH_BLOCKS; ++j) {
+			 childA.push_back(selectedParents[i + 1][j]);
+			 childB.push_back(selectedParents[i][j]);
+		 }
+		 newPopulation.push_back(childA);
+		 newPopulation.push_back(childB);
+	 }
+	 return newPopulation;
+ }
+
+ std::vector < std::vector<int> >childrenMutationCreation(std::vector < std::vector<int> > selectedPopulation) {
+	 std::vector< std::vector<int> > mutatedPopulation;
+	 std::random_device rd;  //Will be used to obtain a seed for the random number engine
+	 std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+	for (int i = 0; i < selectedPopulation.size(); ++i) {
+		 std::uniform_int_distribution<> dis(0, 9);
+		 int randomNumber = dis(gen);
+		 if (randomNumber == 0) {
+			 std::uniform_int_distribution<> disA(0, GRAPH_BLOCKS - 1);
+			 int mutationPoint = disA(gen);
+			 int previousColour = selectedPopulation[i][mutationPoint];
+			 std::uniform_int_distribution<> disB(0, 3);
+			 int newColour = disB(gen);
+			 while (newColour == previousColour) {
+				 newColour = disB(gen);
+			 }
+			 selectedPopulation[i][mutationPoint] = newColour;
+			 
+		 }
+		 mutatedPopulation.push_back(selectedPopulation[i]);
+		 }
+	 return mutatedPopulation;
+ }
+
+ int calculateTotalFitness(){
+	 int totalFitness = 0;
+	 for (int vec : fitness) {
+		 totalFitness += vec;
+	 }
+	 return totalFitness;
+ }
+
+ void assignMaxFitness() {
+	 
+	 for (std::vector<int> vec : graph) {
+		 maxFitness += vec.size();
+	 }
+	 std::cout << "max Fitness" << maxFitness;
+
+ }
+
+ bool canTerminate() {
+	 for (int i = 0; i < fitness.size(); ++i) {
+		 if (fitness[i] == maxFitness) {
+			 bestSolutionPosition = i;
+			 return true;
+		 }
+	 } 
+	 return false;
+ }
+
+
+ void printVector(std::vector<int> vectorToPrint) {
+	 for (int vec : vectorToPrint) {
+		 std::cout << vec << " ";
+	 }
+	 std::cout << "\n";
+ }
+
+ void printVector(std::vector< std::vector<int> > vectorToPrint) {
+	 for (std::vector<int> vec : vectorToPrint) {
+		 for (int vecc : vec) {
+			 std::cout << vecc<< " ";
+		 }
+		 std::cout << "\n";
+	 }
+	 std::cout << "\n";
+ }
+
+ int main() {
+	 graph = touchingBlocks();
+	 assignMaxFitness();
+	 initialisePopulation();
+	 printPopulation();
+	 while (!canTerminate()) {
+		 fitness = applyFitness();
+		 int totalFitness = calculateTotalFitness();
+		 printVector(fitness);
+		 if (!canTerminate()) {
+			 std::vector< std::vector<int> > selectedParents = parentRecombinationSelection(totalFitness);
+			 printVector(selectedParents);
+			 std::vector< std::vector<int> > newPopulation = ParentRecombination(selectedParents);
+			 std::vector< std::vector<int> > newPopulationSelectedFromOlder = newPopulationSelectionFromOld();
+			 for (std::vector<int> vec : newPopulationSelectedFromOlder) {
+				 newPopulation.push_back(vec);
+			 }
+			 newPopulation = childrenMutationCreation(newPopulation);
+			 population = newPopulation;
+		 }
+	 }
+	 std::cout<< "\n \n \n \n \n \n \n \n \n" ;
+	 for (int i = 0; i < GRAPH_BLOCKS; ++i) {
+		 std::cout << population[bestSolutionPosition][i] ;
+	 }
+	 std::cout << "  Best Solution with Fitness" << fitness[bestSolutionPosition];
+	 int i;
 	std::cin >>  i;
 	return 0;
 }
