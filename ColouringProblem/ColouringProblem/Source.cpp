@@ -7,7 +7,7 @@
 #include <random>
 
 std::vector< std::vector<int> > graph;
-int const GRAPH_BLOCKS = 16;
+int GRAPH_BLOCKS;
 int const POPULATION_SIZE = 100;
 int bestSolutionPosition;
 int const PARENT_RECOMBINATION_NUMBER = 50;
@@ -18,8 +18,10 @@ std::vector<int>bestMember;
 int bestFitness = 0;
 bool shouldStop = false; 
 int NUMBER_OF_ITERATIONS_FOR_CHANGES = 10;
+int const NEGATIVE_FITNESS_POINTS = -1;
+int const POSITIVE_FITNESS_POINTS = 1;
 
-std::vector< std::vector<int> > touchingBlocks() {
+std::vector< std::vector<int> > getTouchingBlocks() {
 	std::string line, number = "";
 	int i;
 	std::ifstream colouredBlocks("blocks.txt");
@@ -47,19 +49,8 @@ std::vector< std::vector<int> > touchingBlocks() {
 		colouredBlocks.close();
 	}
 	else std::cout << "Unable to open file";
-
+	GRAPH_BLOCKS = graph.size();
 	return graph;
-}
-
-void const printGraph() {
-
-	//printing the vector
-	for (int i = 0; i < graph.size(); ++i) {
-		for (int j = 0; j < graph[i].size(); ++j) {
-			std::cout << graph[i][j] << " ";
-		}
-		std::cout << "\n";
-	}
 }
 
  void initialisePopulation() {
@@ -74,33 +65,22 @@ void const printGraph() {
 	}
 }
 
- void const printPopulation() {
-	 for (int i = 0; i < POPULATION_SIZE; ++i) {
-		 for (int j = 0; j < GRAPH_BLOCKS; ++j) {
-			 std::cout << population[i][j] << " ";
-		 }
-		 std::cout << "\n";
-	 }
- }
-
 std::vector<int> applyFitness() {
 	 for (int i = 0; i < POPULATION_SIZE; ++i) {
 		 fitness[i] = maxFitness;
 		 for (int j = 0; j < GRAPH_BLOCKS; ++j) {
 			 for (int k = 0; k < graph[j].size(); ++k) {
 				 if (population[i][j] == population[i][graph[j][k] - 1]) {
-					 fitness[i] += -1;
+					 fitness[i] += NEGATIVE_FITNESS_POINTS;
 				 }
 				 else {
-					 fitness[i] += 1;
+					 fitness[i] += POSITIVE_FITNESS_POINTS;
 				 }
 			 }
 		 }
 	 }
 	 return fitness;
  }
-
-
 
 int calculateTotalFitness() {
 	int totalFitness = 0;
@@ -143,17 +123,6 @@ int calculateTotalFitness() {
 		 //selectedParents[i] = population[uniformSelection()];
 	 }
 	 return selectedParents;
- }
-
- std::vector< std::vector<int> > parentMutationSelection() {
-	 std::vector< std::vector<int> >selectedParents;
-	 for (int i = 0; i < PARENT_RECOMBINATION_NUMBER; ++i) {
-		 selectedParents.push_back(population[rouletteWheelSelection(POPULATION_SIZE)]);
-		 //uncomment for uniform selection algorithm
-		 //selectedParents[i] = population[uniformSelection()];
-	 }
-	 return selectedParents;
-
  }
 
  std::vector< std::vector<int> > ParentRecombination(std::vector< std::vector<int> > selectedParents){
@@ -203,12 +172,10 @@ int calculateTotalFitness() {
  }
 
  void assignMaxFitness() {
-	 
+	 int maxFitness = 0;
 	 for (std::vector<int> vec : graph) {
 		 maxFitness += vec.size();
 	 }
-	 std::cout << "max Fitness" << maxFitness;
-
  }
 
  bool wasPerfectSolutionFound() {
@@ -271,10 +238,10 @@ int calculateTotalFitness() {
  }
 
  int main() {
-	 graph = touchingBlocks();
+	 graph = getTouchingBlocks();
 	 assignMaxFitness();
 	 initialisePopulation();
-	 printPopulation();
+	 printVector(population);
 	 while (!canTerminate()) {
 		 fitness = applyFitness();
 		 int totalFitness = calculateTotalFitness();
