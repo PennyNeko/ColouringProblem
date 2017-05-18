@@ -172,7 +172,6 @@ int calculateTotalFitness() {
  }
 
  void assignMaxFitness() {
-	 int maxFitness = 0;
 	 for (std::vector<int> vec : graph) {
 		 maxFitness += vec.size();
 	 }
@@ -180,7 +179,7 @@ int calculateTotalFitness() {
 
  bool wasPerfectSolutionFound() {
 	 for (int i = 0; i < fitness.size(); ++i) {
-		 if (fitness[i] == 2 * maxFitness) {
+		 if (fitness[i] == 2*maxFitness) {
 			 bestSolutionPosition = i;
 			 bestMember = population[i];
 			 return true;
@@ -190,11 +189,12 @@ int calculateTotalFitness() {
  }
 
  bool wasNoSignificantChangeNoticed() {
- 
+	 return false;
  }
 
  void findBestMember() {
 	 for (int i = 0; i < POPULATION_SIZE; ++i) {
+
 		 if (bestFitness < fitness[i]) {
 			 bestFitness = fitness[i];
 			 bestMember = population[i];
@@ -208,7 +208,7 @@ int calculateTotalFitness() {
 		 shouldStop = true;
 		 return true;
 	 }
-	 else if (wasNoSignificantChangeNoticed){
+	 else if (wasNoSignificantChangeNoticed()){
 		 shouldStop = true;
 		 return true;
 	 }
@@ -241,7 +241,7 @@ int calculateTotalFitness() {
 	 graph = getTouchingBlocks();
 	 assignMaxFitness();
 	 initialisePopulation();
-	 printVector(population);
+	 //printVector(population);
 	 while (!canTerminate()) {
 		 fitness = applyFitness();
 		 int totalFitness = calculateTotalFitness();
