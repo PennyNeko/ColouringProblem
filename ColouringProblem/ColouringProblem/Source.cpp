@@ -190,13 +190,13 @@ int calculateTotalFitness() {
  }
 
  bool wasNoSignificantChangeNoticed(std::vector<int> totalFitnesses) {
-	 if (totalFitnesses.size() > 9) {
+	 if (totalFitnesses.size() > TURNS_FOR_CHANGE - 1) {
 		 int fitnessDifference = 0;
 		 for (int i = totalFitnesses.size() -1 ; i > totalFitnesses.size() - TURNS_FOR_CHANGE - 1; --i) {
 			 fitnessDifference += totalFitnesses[i];
 		 }
 		 fitnessDifference /= TURNS_FOR_CHANGE;
-		 if (fitnessDifference < 50) {
+		 if (fitnessDifference < -1) {
 			 return true;
 		 }
 		 else return false;
