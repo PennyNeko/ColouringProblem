@@ -7,6 +7,7 @@
 #include <random>
 
 std::vector< std::vector<int> > graph;
+int const TURNS_FOR_CHANGE = 10;
 int GRAPH_BLOCKS;
 int const POPULATION_SIZE = 100;
 int bestSolutionPosition;
@@ -188,8 +189,19 @@ int calculateTotalFitness() {
 	 return false;
  }
 
- bool wasNoSignificantChangeNoticed() {
-	 return false;
+ bool wasNoSignificantChangeNoticed(std::vector<int> totalFitnesses) {
+	 if (totalFitnesses.size() > 9) {
+		 int fitnessDifference = 0;
+		 for (int i = totalFitnesses.size() -1 ; i > totalFitnesses.size() - TURNS_FOR_CHANGE - 1; --i) {
+			 fitnessDifference += totalFitnesses[i];
+		 }
+		 fitnessDifference /= TURNS_FOR_CHANGE;
+		 if (fitnessDifference < 50) {
+			 return true;
+		 }
+		 else return false;
+	 }
+	 else return false;
  }
 
  void findBestMember() {
@@ -203,12 +215,13 @@ int calculateTotalFitness() {
  }
 
 
- bool canTerminate() {
+ bool canTerminate(std::vector<int> totalFitnesses) {
+	 findBestMember();
 	 if (wasPerfectSolutionFound()) {
 		 shouldStop = true;
 		 return true;
 	 }
-	 else if (wasNoSignificantChangeNoticed()){
+	 else if (wasNoSignificantChangeNoticed(totalFitnesses)) {
 		 shouldStop = true;
 		 return true;
 	 }
@@ -238,14 +251,15 @@ int calculateTotalFitness() {
  }
 
  int main() {
+	 std::vector<int> totalFitnesses;
 	 graph = getTouchingBlocks();
 	 assignMaxFitness();
 	 initialisePopulation();
 	 //printVector(population);
-	 while (!canTerminate()) {
+	 while (!canTerminate(totalFitnesses)) {
 		 fitness = applyFitness();
-		 int totalFitness = calculateTotalFitness();
-		 std::cout << totalFitness;
+		 totalFitnesses.push_back(calculateTotalFitness());
+		 std::cout << totalFitnesses.back();
 		 printVector(fitness);
 		 if (!shouldStop) {
 			 std::vector< std::vector<int> > selectedParents = parentRecombinationSelection();

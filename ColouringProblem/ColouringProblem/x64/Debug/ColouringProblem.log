@@ -1,6 +1,7 @@
 ﻿  Source.cpp
-d:\users\penny\documents\colouringproblem\colouringproblem\colouringproblem\source.cpp(52): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
-d:\users\penny\documents\colouringproblem\colouringproblem\colouringproblem\source.cpp(176): warning C4267: '+=': conversion from 'size_t' to 'int', possible loss of data
-d:\users\penny\documents\colouringproblem\colouringproblem\colouringproblem\source.cpp(103): warning C4715: 'rouletteWheelSelection': not all control paths return a value
+d:\users\penny\documents\colouringproblem\colouringproblem\colouringproblem\source.cpp(53): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+d:\users\penny\documents\colouringproblem\colouringproblem\colouringproblem\source.cpp(177): warning C4267: '+=': conversion from 'size_t' to 'int', possible loss of data
+d:\users\penny\documents\colouringproblem\colouringproblem\colouringproblem\source.cpp(195): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+d:\users\penny\documents\colouringproblem\colouringproblem\colouringproblem\source.cpp(104): warning C4715: 'rouletteWheelSelection': not all control paths return a value
   ColouringProblem.vcxproj -> d:\Users\Penny\Documents\ColouringProblem\ColouringProblem\x64\Debug\ColouringProblem.exe
   ColouringProblem.vcxproj -> d:\Users\Penny\Documents\ColouringProblem\ColouringProblem\x64\Debug\ColouringProblem.pdb (Partial PDB)
