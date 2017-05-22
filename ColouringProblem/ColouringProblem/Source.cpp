@@ -5,6 +5,7 @@
 #include<vector>
 #include <string>
 #include <random>
+#include <chrono>
 
 std::vector< std::vector<int> > graph;
 int GRAPH_BLOCKS;
@@ -218,6 +219,8 @@ int main() {
 	std::cout << "enter name of file \n";
 	std::cin >> blockFileName;
 	graph = getTouchingBlocks(blockFileName);
+
+	auto start = std::chrono::high_resolution_clock::now();
 	assignMaxFitness();
 	initialisePopulation();
 	applyFitness();
@@ -236,8 +239,9 @@ int main() {
 		generationsCount++;
 	}
 	printVector(bestMember);
-	std::cout << "was the best solution with Fitness: " << bestFitness / 2 << "\nIterations needed: " << generationsCount;
-	int i;
+	std::cout << "was the best solution with Fitness: " << bestFitness / 2 << "\nIterations needed: " << generationsCount << std::endl;
+	std::cout << "Time needed: " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start).count() << "ms" << std::endl;
+	int i = 0;
 	std::cin >> i;
 	return 0;
 }

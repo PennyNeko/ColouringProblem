@@ -1,0 +1,11 @@
+﻿  Source.cpp
+Source.cpp(73): warning C4018: '<': signed/unsigned mismatch
+Source.cpp(149): warning C4018: '<': signed/unsigned mismatch
+Source.cpp(178): warning C4018: '<': signed/unsigned mismatch
+  Generating code
+  14 of 540 functions ( 2.6%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    8 functions had inline decision re-evaluated but remain unchanged
+  Finished generating code
+  ColouringProblem.vcxproj -> C:\Users\fbeth\Desktop\ColouringProblem\ColouringProblem\Release\ColouringProblem.exe
+  ColouringProblem.vcxproj -> C:\Users\fbeth\Desktop\ColouringProblem\ColouringProblem\Release\ColouringProblem.pdb (Full PDB)
